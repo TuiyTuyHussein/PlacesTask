@@ -75,7 +75,7 @@ public class FeaturedAdapter extends RecyclerView.Adapter<FeaturedAdapter.Holder
 
             Picasso.with(getContext())
                     .load(item.getImage().getUrl())
-                    .into(new BitmapTarget(item.getImage().getUrl() , context));
+                    .into(new BitmapTarget(item.getImage().getUrl() , context , null));
         }else {
             Bitmap cachedBitmap = aCache.getCachedBitmap(item.getImage().getUrl());
             holder.image.setImageBitmap(cachedBitmap);

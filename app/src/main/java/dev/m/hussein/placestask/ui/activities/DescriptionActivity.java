@@ -1,9 +1,6 @@
 package dev.m.hussein.placestask.ui.activities;
 
 import android.Manifest;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -20,7 +17,6 @@ import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.LinearInterpolator;
 import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -41,6 +37,10 @@ import dev.m.hussein.placestask.models.Item;
 public class DescriptionActivity extends AppCompatActivity {
 
     private static final int STORAGE_REQUEST_CODE = 12;
+
+    /**
+     * define views using butterKnife
+     * */
     @Bind(R.id.image)
     ImageView imageView;
     @Bind(R.id.description)
@@ -51,6 +51,7 @@ public class DescriptionActivity extends AppCompatActivity {
     Toolbar toolbar;
     @Bind(R.id.download)
     AppCompatImageButton download;
+
 
 
     Item item;
@@ -88,13 +89,21 @@ public class DescriptionActivity extends AppCompatActivity {
 
 
 
-    private void inflateData() {
 
+    /**
+     * inflate data with returned from intent
+     * */
+    private void inflateData() {
         description.setText(item.getPlaceDescription());
         price.setText(String.valueOf(item.getPrice()).concat("$"));
 
         Log.i("IMAGEURL" , "url : "+item.getImage().getUrl());
 
+        /**
+         * check if internet providers is connected
+         * if connected --> will download image
+         * else --> will get image from cache
+         * */
         if (Config.isNetworkAvailable(this)) {
             Picasso.with(this)
                     .load(item.getImage().getUrl())
@@ -104,7 +113,7 @@ public class DescriptionActivity extends AppCompatActivity {
 
             Picasso.with(this)
                     .load(item.getImage().getUrl())
-                    .into(new BitmapTarget(item.getImage().getUrl() , this));
+                    .into(new BitmapTarget(item.getImage().getUrl() , this , null));
         }else {
             Bitmap cachedBitmap = aCache.getCachedBitmap(item.getImage().getUrl());
             imageView.setImageBitmap(cachedBitmap);
@@ -112,12 +121,18 @@ public class DescriptionActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * get data from intent
+     * */
     private void getData() {
         item = (Item) getIntent().getSerializableExtra("item");
     }
 
 
 
+    /**
+     * download image when click on download button
+     * */
     private void downloadImage() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             // check permission for marshmellow.
@@ -134,12 +149,24 @@ public class DescriptionActivity extends AppCompatActivity {
         Log.i("IMAGEURL" , "url : "+item.getImage().getUrl());
 
 
-        Bitmap bitmap = DrawableConfig.getBitmapFromURL(item.getImage().getUrl());
-        Bitmap bitmapWithWaterMark = DrawableConfig.addWaterMark(bitmap , DrawableConfig.getBitmapFromResources(this , R.mipmap.ic_launcher));
-        File file = DrawableConfig.saveFile(this , bitmapWithWaterMark , "Image"+item.getId());
-        openFile(file);
+        Picasso.with(this)
+                .load(item.getImage().getUrl())
+                .into(new BitmapTarget(item.getImage().getUrl(), this, new BitmapTarget.OnBitmapLoaded() {
+                    @Override
+                    public void setOnBitmapLoaded(Bitmap onBitmapLoaded) {
+                        Bitmap bitmapWithWaterMark = DrawableConfig.addWaterMark(onBitmapLoaded , DrawableConfig.getBitmapFromResources(DescriptionActivity.this , R.mipmap.ic_launcher));
+                        File file = DrawableConfig.saveBitmapAsFile(DescriptionActivity.this , bitmapWithWaterMark , "Image"+item.getId());
+                        openFile(file);
+                    }
+                }));
+
+
+
     }
 
+    /**
+     * when image download this will open it on device browser
+     * */
     private void openFile(File file) {
         Uri uri =  Uri.fromFile(file);
         Intent intent = new Intent(android.content.Intent.ACTION_VIEW);

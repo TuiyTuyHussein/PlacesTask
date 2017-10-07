@@ -109,7 +109,7 @@ public class ExploreAdapter extends RecyclerView.Adapter<ExploreAdapter.Holder> 
 
             Picasso.with(getContext())
                     .load(item.getImage().getUrl())
-                    .into(new BitmapTarget(item.getImage().getUrl() , context));
+                    .into(new BitmapTarget(item.getImage().getUrl() , context , null));
         }else {
             Bitmap cachedBitmap = aCache.getCachedBitmap(item.getImage().getUrl());
             holder.image.setImageBitmap(cachedBitmap);
@@ -133,34 +133,6 @@ public class ExploreAdapter extends RecyclerView.Adapter<ExploreAdapter.Holder> 
             }
         });
 
-    }
-
-
-
-    private class GlobalLayoutListener implements ViewTreeObserver.OnGlobalLayoutListener {
-
-        private View view;
-        private int newWidth , newHeight;
-
-        public GlobalLayoutListener(View view, int newWidth, int newHeight) {
-            this.view = view;
-            this.newWidth = newWidth;
-            this.newHeight = newHeight;
-        }
-
-        @Override
-        public void onGlobalLayout() {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-            }
-            int width = view.getWidth();
-            int height = (width * newHeight) / newWidth;
-
-            Log.i("IMAGES_DIMEN" , "w : "+width+" , h : "+height);
-            Log.i("IMAGES_DIMEN" , "nw : "+newWidth+" , nh : "+newHeight);
-
-            view.setLayoutParams(new RelativeLayout.LayoutParams(width , height));
-        }
     }
 
 

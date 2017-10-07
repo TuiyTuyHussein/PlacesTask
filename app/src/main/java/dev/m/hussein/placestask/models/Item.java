@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 /**
  * Created by Dev. M. Hussein on 10/6/2017.
+ *
+ * used to define returned items from server
  */
 
 public class Item implements Serializable {

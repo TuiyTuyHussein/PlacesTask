@@ -20,44 +20,63 @@ import retrofit2.http.Query;
 
 public interface Api {
 
+    /**
+     * this class used to initialize variables
+     * E.X.  links , tags
+     * */
     class Constants{
         // api service links.
         public static final String BASE_SERVER_URI = "http://grapes-n-berries.getsandbox.com/sightsofegypt/";
-
-
     }
 
+
+    /**
+     * Enums for methods types
+     * */
     enum  METHODS{
         FEATURED , EXPLORE
     }
 
+
+    /**
+     * To create featured places method
+     * */
     @GET("featured")
     Call<ResponseBody> getFeaturedMethod();
 
+
+    /**
+     * To create explore places method
+     *
+     * @param count use this parameter to define the count of response items
+     * @param from use this parameter to define the first id to get data from
+     * */
     @GET("explore")
     Call<ResponseBody> getExploreMethod(@Query("count") int count , @Query("from") int from);
 
 
+    /**
+     * this used to start connecting to server and get data
+     * */
     class connection {
 
-        public static final int TYPE_SERVER = 200;
 
-
+        /**
+         * initialize retrofit
+         * */
         private static Retrofit open() {
 
             /**
              * to create time out request connecting to the server
              * */
-
             HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
             loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-
             OkHttpClient okHttpClient = new OkHttpClient.Builder()
                     .readTimeout(60, TimeUnit.SECONDS)
                     .connectTimeout(60, TimeUnit.SECONDS)
                     .addInterceptor(loggingInterceptor)
                     .build();
+
 
             return new Retrofit.Builder()
                     .baseUrl(Constants.BASE_SERVER_URI)
@@ -69,6 +88,14 @@ public interface Api {
 
 
 
+        /**
+         * using this to load places
+         *
+         * @param methods to define return type
+         * @param count count for returned items
+         * @param from start id to get from
+         * @param onItemsLoaded listener to return data from this class to views
+         * */
         public static Call<ResponseBody> loadItems(final METHODS methods , int count , int from , final OnItemsLoaded onItemsLoaded) {
             Retrofit retrofit = Api.connection.open();
             Api apiService = retrofit.create(Api.class);
@@ -112,6 +139,9 @@ public interface Api {
     }
 
 
+    /**
+     * interface used as a listener to connect presenter with views
+     * */
     interface OnItemsLoaded{
         void onResponse(METHODS methods , String response);
         void onResponseFailure(METHODS methods , Exception failure);

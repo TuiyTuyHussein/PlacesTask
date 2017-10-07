@@ -30,27 +30,14 @@ import dev.m.hussein.placestask.R;
 
 public class DrawableConfig {
 
+
+
     /**
-     * Downloading push notification image before displaying it in
-     * the notification tray
-     */
-    public static Bitmap getBitmapFromURL(String strURL) {
-        try {
-            URL url = new URL(strURL);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setDoInput(true);
-            connection.connect();
-            InputStream input = connection.getInputStream();
-            Bitmap myBitmap = BitmapFactory.decodeStream(input);
-            return myBitmap;
-        } catch (IOException e) {
-            // Log exception
-            Log.i("DOWNLOAD_TAG" , "error : "+e.getMessage());
-            return null;
-        }
-    }
-
-
+     * use this to create bitmap with waterMark
+     *
+     * @param source source bitmap
+     * @param waterMark waterMark Bitmap which will be added on source bitmap
+     * */
     public static Bitmap addWaterMark(Bitmap source , Bitmap waterMark){
         if (source == null) return null;
         int w = source.getWidth();
@@ -69,6 +56,11 @@ public class DrawableConfig {
     }
 
 
+    /**
+     * using this to get bitmap from resources drawable
+     *
+     * @param drawableRes drawable resource id
+     * */
     public static Bitmap getBitmapFromResources(Context context , int drawableRes) {
         Drawable drawable = ContextCompat.getDrawable(context , drawableRes);
         Canvas canvas = new Canvas();
@@ -81,7 +73,13 @@ public class DrawableConfig {
     }
 
 
-    public  static File saveFile (Context context, Bitmap bitmap , String name) {
+    /**
+     * using this to save image
+     *
+     * @param bitmap bitmap which will be save
+     * @param name this name of file
+     * */
+    public  static File saveBitmapAsFile(Context context, Bitmap bitmap , String name) {
 
         if (bitmap == null) return null;
         File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), context.getString(R.string.app_name));

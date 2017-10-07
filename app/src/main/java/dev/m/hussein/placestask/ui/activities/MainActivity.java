@@ -29,6 +29,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import dev.m.hussein.placestask.R;
 import dev.m.hussein.placestask.api.Api;
+import dev.m.hussein.placestask.config.CacheConfig;
 import dev.m.hussein.placestask.config.Config;
 import dev.m.hussein.placestask.models.Item;
 import dev.m.hussein.placestask.ui.adapter.ExploreAdapter;
@@ -36,6 +37,9 @@ import dev.m.hussein.placestask.ui.adapter.FeaturedAdapter;
 import retrofit2.Call;
 
 public class MainActivity extends AppCompatActivity implements Api.OnItemsLoaded {
+    /**
+     * define views using butterKnife
+     * */
     @Bind(R.id.featuredList)
     RecyclerView featuredRecyclerView;
     @Bind(R.id.featuredProgress)
@@ -44,7 +48,6 @@ public class MainActivity extends AppCompatActivity implements Api.OnItemsLoaded
     RecyclerView exploreRecyclerView;
     @Bind(R.id.exploreProgress)
     ProgressBar exploreProgress;
-    private boolean loading = false;
 
     private Context context;
     private List<Item> featuredArray =new LinkedList<>()
@@ -52,7 +55,8 @@ public class MainActivity extends AppCompatActivity implements Api.OnItemsLoaded
 
     private EndlessRecyclerViewAdapter exploreAdapter;
     private FeaturedAdapter featuredAdapter;
-    ACache mCache ;
+    CacheConfig mCache ;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,13 +64,16 @@ public class MainActivity extends AppCompatActivity implements Api.OnItemsLoaded
         ButterKnife.bind(this);
         context = this;
 
-        mCache = ACache.get(this);
+        mCache = new CacheConfig(this);
 
         setupFeaturedViews();
         setupExploreViews();
 
     }
 
+    /**
+     * setup Explore Views
+     * */
     private void setupExploreViews() {
         StaggeredGridLayoutManager exploreGridLayoutManager = new StaggeredGridLayoutManager(2 , StaggeredGridLayoutManager.VERTICAL);
         exploreRecyclerView.setLayoutManager(exploreGridLayoutManager);
@@ -84,6 +91,14 @@ public class MainActivity extends AppCompatActivity implements Api.OnItemsLoaded
 
     }
 
+
+    /**
+     * get explore items
+     *
+     * check if internet providers is connected
+     * if connected --> will download items
+     * else --> will get items from cache
+     * */
     private Call call;
     private int lastId = 0;
     private void getExploreItems() {
@@ -102,6 +117,9 @@ public class MainActivity extends AppCompatActivity implements Api.OnItemsLoaded
             call = Api.connection.loadItems(Api.METHODS.EXPLORE , 10 , lastId , this);
     }
 
+    /**
+     * setup Featured Views
+     * */
     private void setupFeaturedViews() {
         LinearLayoutManager featuredLayoutManager = new LinearLayoutManager(context , LinearLayoutManager.HORIZONTAL , false);
         featuredRecyclerView.setLayoutManager(featuredLayoutManager);
@@ -111,6 +129,13 @@ public class MainActivity extends AppCompatActivity implements Api.OnItemsLoaded
 
     }
 
+    /**
+     * get Featured items
+     *
+     * check if internet providers is connected
+     * if connected --> will download items
+     * else --> will get items from cache
+     * */
     private void getFeaturedItems() {
         if (featuredArray.size() == 0 && !Config.isNetworkAvailable(this)){
             Log.i("JSON_DATA_TAG" , "cache featured : "+mCache.getAsString("featured"));
@@ -125,6 +150,9 @@ public class MainActivity extends AppCompatActivity implements Api.OnItemsLoaded
 
 
 
+    /**
+     * this method called when server finish getting items
+     * */
     @Override
     public void onResponse(Api.METHODS methods, String response) {
         Log.i("STREAM_TAG" , "response : "+ response);
@@ -138,7 +166,9 @@ public class MainActivity extends AppCompatActivity implements Api.OnItemsLoaded
         }
     }
 
-
+    /**
+     * this method called when server Response failure
+     * */
     @Override
     public void onResponseFailure(Api.METHODS methods, Exception failure) {
 
@@ -147,8 +177,10 @@ public class MainActivity extends AppCompatActivity implements Api.OnItemsLoaded
     }
 
 
+    /**
+     * used to inflate data on Featured Views
+     * */
     private void handleFeaturedResponse(List<Item> items) {
-
         if (items == null || items.size() == 0) return;
         featuredArray.addAll(items);
         featuredAdapter.notifyDataSetChanged();
@@ -159,6 +191,9 @@ public class MainActivity extends AppCompatActivity implements Api.OnItemsLoaded
 
 
 
+    /**
+     * used to inflate data on Explore Views
+     * */
     private int lastPosition = 0;
     private void handleExploreResponse(List<Item> items) {
 
@@ -166,11 +201,6 @@ public class MainActivity extends AppCompatActivity implements Api.OnItemsLoaded
         call = null;
 
         int lastId = items.get(items.size() - 1 ).getId() == null ? 0 : items.get(items.size() - 1 ).getId();
-
-
-
-
-
         if (lastId != this.lastId){
             this.lastId = lastId;
         }else{
@@ -191,6 +221,9 @@ public class MainActivity extends AppCompatActivity implements Api.OnItemsLoaded
 
 
 
+    /**
+     * used to save data on cache
+     * */
     private void save(){
         Gson gson = new GsonBuilder().create();
         if (featuredArray != null && featuredArray.size() > 0){

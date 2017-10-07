@@ -23,6 +23,9 @@ public class Config {
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
+    /**
+     * using this method to convert dp to pixel
+     * */
     public static int dpToPx(Context context , int dp) {
         DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
         return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
