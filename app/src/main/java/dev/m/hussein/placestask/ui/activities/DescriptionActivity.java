@@ -177,7 +177,12 @@ public class DescriptionActivity extends AppCompatActivity {
             mime = mimeTypeMap.getMimeTypeFromExtension(
                     mimeTypeMap.getFileExtensionFromUrl(uri.toString()));
         intent.setDataAndType(uri,mime);
-        startActivity(intent);
+        try {
+            startActivity(intent);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
 
 
