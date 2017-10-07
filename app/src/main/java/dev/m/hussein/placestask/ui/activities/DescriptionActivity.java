@@ -165,7 +165,7 @@ public class DescriptionActivity extends AppCompatActivity {
     }
 
     /**
-     * when image download this will open it on device browser
+     * when image download this will open it on device gallery
      * */
     private void openFile(File file) {
         Uri uri =  Uri.fromFile(file);
